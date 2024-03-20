@@ -1,32 +1,42 @@
 namespace EnvelopeBuilder {
   processor SustainSegment {
-    input event float startLevel;
+    input stream float in;
+    input event void capture;
     input event void halt;
-    output stream float gain;
+    output event void trigger;
+    output stream float out;
 
     enum State {
-      Active, Inactive
+      Active, Inactive, Transitioning
     }
 
     State state = State::Inactive;
-    float evLevel;
+    float currentLevel;
+    float capturedLevel;
 
-    event startLevel(float level) {
-      evLevel = level;
+    event capture() {
+      capturedLevel = currentLevel;
       state = State::Active;
     }
 
     event halt() {
-      state = State::Inactive;
+      trigger <- void;
+      if (state == State::Active) {
+        state = State::Transitioning;  
+      }
     }
 
     void main() {
       loop {
         if (state == State::Inactive) {
-          gain <- 0.0;
+          currentLevel = in;
         } else if (state == State::Active) {
-          gain <- evLevel;
+          currentLevel = capturedLevel;
+        } else if (state == State::Transitioning) {
+          currentLevel = capturedLevel;
+          state = State::Inactive;
         }
+        out <- currentLevel;
         advance();
       }
     }

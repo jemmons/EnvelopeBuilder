@@ -23,18 +23,16 @@ namespace EnvelopeBuilder {
       a1 = EnvelopeSegment;
       d1 = EnvelopeSegment;
       s1 = SustainSegment;
+      r1 = EnvelopeSegment;
       clipper = Clipper;
     }
 
-
-    event noteIn (std::notes::NoteOn on) {
-      a1.startLevel <- 0.f;
-      d1.halt <- void;
-      s1.halt <- void;
+    event noteIn(std::notes::NoteOn on) {
+      a1.capture <- void;
     }
 
 
-    event noteIn (std::notes::NoteOff off) {
+    event noteIn(std::notes::NoteOff off) {
       a1.halt <- void;
       d1.halt <- void;
       s1.halt <- void;
@@ -42,14 +40,21 @@ namespace EnvelopeBuilder {
 
 
     connection {
-      0.5f -> a1.seconds;
-      0.8f -> a1.targetLevel;
+      0.3f -> a1.seconds;
+      0.3f -> a1.targetLevel;
       0.3f -> d1.seconds;
-      0.5f -> d1.targetLevel;
+      0.3f -> d1.targetLevel;
+      0.2f -> r1.seconds;
+      0.f -> r1.targetLevel;
 
-      a1.nextStart -> d1.startLevel;
-      d1.nextStart -> s1.startLevel;
-      (a1.gain + d1.gain + s1.gain) -> clipper -> out;
+      a1.trigger -> d1.capture;
+      d1.trigger -> s1.capture;
+      s1.trigger -> r1.capture;
+      
+      a1.out -> d1.in;
+      d1.out -> s1.in;
+      s1.out -> r1.in;
+      r1.out -> clipper -> out;
     }
   }
 

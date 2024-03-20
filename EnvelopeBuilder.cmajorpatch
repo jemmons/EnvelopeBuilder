@@ -11,9 +11,10 @@
 
     "source":           [
         "source/Main.cmajor", 
-        "source/OneShotPhasor.cmajor", 
-        "source/PhaseMapper.cmajor",
-        "source/EnvelopeSegment.cmajor",
-        "source/SustainSegment.cmajor"
+        "source/components/OneShotPhasor.cmajor", 
+        "source/components/ClipNormal.cmajor", 
+        "source/segments/EnvelopeSegment.cmajor",
+        "source/segments/SustainSegment.cmajor",
+        "source/envelopes/ADSR.cmajor"
     ]
 }

@@ -1,74 +1,14 @@
 namespace EnvelopeBuilder {
   graph Main [[main]] {
     input event std::midi::Message midiIn;
-    input adsr.attack;
+    input adsr.attack, adsr.decay, adsr.sustain, adsr.release;
     output stream float out;
     
-    node adsr = ADSR;
+    node adsr = EnvelopeBuilder::Envelopes::ADSR;
 
     connection {
       midiIn -> std::midi::MPEConverter -> adsr.noteIn;
       adsr -> out;
     }
   }
-
-
-  graph ADSR {
-    input event (std::notes::NoteOn, std::notes::NoteOff) noteIn;
-    input event float attack [[name: "Attack", min: 0.0, max: 10.0]];
-    output stream float out;
-
-
-    node { 
-      a1 = EnvelopeSegment;
-      d1 = EnvelopeSegment;
-      s1 = SustainSegment;
-      r1 = EnvelopeSegment;
-      clipper = Clipper;
-    }
-
-    event noteIn(std::notes::NoteOn on) {
-      a1.capture <- void;
-    }
-
-
-    event noteIn(std::notes::NoteOff off) {
-      a1.halt <- void;
-      d1.halt <- void;
-      s1.halt <- void;
-    }
-
-
-    connection {
-      0.3f -> a1.seconds;
-      0.3f -> a1.targetLevel;
-      0.3f -> d1.seconds;
-      0.3f -> d1.targetLevel;
-      0.2f -> r1.seconds;
-      0.f -> r1.targetLevel;
-
-      a1.trigger -> d1.capture;
-      d1.trigger -> s1.capture;
-      s1.trigger -> r1.capture;
-      
-      a1.out -> d1.in;
-      d1.out -> s1.in;
-      s1.out -> r1.in;
-      r1.out -> clipper -> out;
-    }
-  }
-
-
-  processor Clipper {
-    input stream float in;
-    output stream float out;
-
-    void main() {
-      loop {
-        out <- min(max(in,-1.f),1.f);
-        advance();
-      }
-    }
-  }
-
 }

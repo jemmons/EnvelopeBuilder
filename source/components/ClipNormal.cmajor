@@ -1,0 +1,15 @@
+namespace EnvelopeBuilder {
+  namespace Components {
+    processor ClipNormal {
+      input stream float in;
+      output stream float out;
+
+      void main() {
+        loop {
+          out <- min(max(in,-1.f),1.f);
+          advance();
+        }
+      }
+    }
+  }
+}

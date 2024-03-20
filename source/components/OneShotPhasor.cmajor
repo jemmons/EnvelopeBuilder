@@ -1,0 +1,47 @@
+namespace EnvelopeBuilder {
+  namespace Components {
+    processor OneShotPhasor {
+      input event void trigger;
+      input event void halt;
+      input value float seconds;
+      output stream float phase;
+
+      enum State {
+        Inactive, Active
+      }
+
+      State state = State::Inactive;
+      int frameCount;
+      float delta;
+
+      event trigger() {
+        frameCount = 0;
+        state = State::Active;
+      }
+
+      event halt() {
+        state = State::Inactive;
+      }
+
+      void main() {
+        loop {
+          if (state == State::Inactive) {
+            phase <- -1.f;
+            
+          } else if (state == State::Active) {
+            let frameCap = roundToInt(float(processor.frequency) * seconds);
+            if (frameCount >= frameCap) {
+              phase <- 1.0;
+              state = State::Inactive;
+
+            } else {
+              phase <- float(frameCount)/float(frameCap);
+              frameCount++;
+            }
+          }
+          advance();
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+
+{
+    "CmajorVersion":    1,
+    "ID":               "com.your_name.your_patch_ID",
+    "version":          "1.0",
+    "name":             "Untitled",
+    "description":      "Untitled",
+    "category":         "generator",
+    "manufacturer":     "Your Company Goes Here",
+    "isInstrument":     true,
+
+    "source":           [
+        "source/Main.cmajor", 
+        "source/OneShotPhasor.cmajor", 
+        "source/PhaseMapper.cmajor",
+        "source/EnvelopeSegment.cmajor",
+        "source/SustainSegment.cmajor"
+    ]
+}

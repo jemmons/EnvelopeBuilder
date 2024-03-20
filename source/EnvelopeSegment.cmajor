@@ -1,0 +1,26 @@
+namespace EnvelopeBuilder {
+  graph EnvelopeSegment() {
+    input event float startLevel;
+    input phasor.halt;
+    input phasor.seconds;
+    input mapper.targetLevel;
+    
+    output mapper.nextStart;
+    output stream float gain;
+
+    event startLevel(float start) {
+      mapper.startLevel <- start;
+      phasor.trigger <- void;
+    }
+
+    node {
+      phasor = OneShotPhasor;
+      mapper = PhaseMapper;
+    }
+    
+    connection {
+      phasor.phase -> mapper.phase;
+      mapper.outLevel -> gain;
+    }
+  }
+}

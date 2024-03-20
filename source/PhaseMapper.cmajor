@@ -1,0 +1,28 @@
+namespace EnvelopeBuilder {
+  processor PhaseMapper {
+    input value float startLevel;
+    input value float targetLevel;
+    input stream float phase;
+
+    output stream float outLevel;
+    output event float nextStart;
+
+
+    void main() {
+      loop {
+        if (phase < 0.f) {
+          outLevel <- 0.f;
+        
+        } else if (phase == 1.f) {
+          outLevel <- 0.f;
+          nextStart <- targetLevel;
+
+        } else {
+          outLevel <- (targetLevel - startLevel) * phase + startLevel;
+        }
+
+        advance();
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ namespace EnvelopeBuilder {
       input stream float in;
       input value float seconds;
       input value float targetLevel;
+      input value float curve;
       input event void capture;
       input event void halt;
       output event void trigger;
@@ -33,7 +34,8 @@ namespace EnvelopeBuilder {
             trigger <- void;
 
           } else {
-            currentLevel = (targetLevel - startLevel) * phasor.phase + startLevel;
+            let phaseFactor = (phasor.phase/(curve * phasor.phase + (1.f - curve)));
+            currentLevel = (targetLevel - startLevel) * phaseFactor + startLevel;
           }
           
           out <- currentLevel;

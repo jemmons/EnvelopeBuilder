@@ -15,6 +15,8 @@
         "source/components/ClipNormal.cmajor", 
         "source/segments/EnvelopeSegment.cmajor",
         "source/segments/SustainSegment.cmajor",
-        "source/envelopes/ADSR.cmajor"
+        "source/segments/ConstantSegment.cmajor",
+        "source/envelopes/ADSR.cmajor",
+        "source/envelopes/GADSR.cmajor"
     ]
 }

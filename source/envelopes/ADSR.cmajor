@@ -17,6 +17,9 @@ namespace EnvelopeBuilder {
       }
 
       event noteIn(std::notes::NoteOn on) {
+        dec.halt <- void;
+        sus.halt <- void;
+        rel.halt <- void;
         att.capture <- void;
       }
 

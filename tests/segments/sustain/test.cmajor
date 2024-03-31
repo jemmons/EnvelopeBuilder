@@ -1,0 +1,44 @@
+graph testPassthrough
+{
+    input stream float ramp1k;
+    output stream float ramp1ko;
+
+    node sus = EnvelopeBuilder::Segments::SustainSegment;
+
+    connection {
+        ramp1k -> sus.in;
+        sus.out -> ramp1ko;
+    }
+}
+
+
+graph testLatch
+{
+    input stream float ramp1k;
+    input sus.latch;
+    output stream float sus200;
+
+    node sus = EnvelopeBuilder::Segments::SustainSegment;
+
+    connection {
+        ramp1k -> sus.in;
+        sus.out -> sus200;
+    }
+}
+
+
+graph testFree
+{
+    input stream float ramp1k;
+    input sus.latch;
+    input sus.free;
+    output stream float free600;
+
+    node sus = EnvelopeBuilder::Segments::SustainSegment;
+
+    connection {
+        ramp1k -> sus.in;
+        sus.out -> free600;
+    }
+
+}

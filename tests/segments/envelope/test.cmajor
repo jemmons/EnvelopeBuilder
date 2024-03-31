@@ -1,0 +1,47 @@
+graph testPassthrough
+{
+    input stream float ramp1k;
+    output stream float ramp1ko;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        ramp1k -> env.in;
+        env.out -> ramp1ko;
+    }
+}
+
+graph testLinearLatch
+{
+    input stream float ramp1k;
+    input env.latch;
+    output stream float linLatch200;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.3f -> env.seconds;
+        0.f -> env.curve;
+        ramp1k -> env.in;
+        env.out -> linLatch200;
+    }
+}
+
+graph testCurveLatch
+{
+    input stream float ramp1k;
+    input env.latch;
+    output stream float curLatch200;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.3f -> env.seconds;
+        0.9f -> env.curve;
+        ramp1k -> env.in;
+        env.out -> curLatch200;
+    }
+}
+

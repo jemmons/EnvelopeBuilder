@@ -1,49 +1,65 @@
-namespace EnvelopeBuilder {
-  namespace Segments {
-    processor EnvelopeSegment() {
-      input stream float in;
-      input value float seconds;
-      input value float targetLevel;
-      input value float curve;
-      input event void capture;
-      input event void halt;
-      output event void trigger;
-      output stream float out;
+namespace EnvelopeBuilder 
+{
+    namespace Segments 
+    {
+        processor EnvelopeSegment 
+        {
+            input stream float in;
+            input value float seconds;
+            input value float targetLevel;
+            input value float curve;
+            input event void latch;
+            input event void free;
+            output event void trigger;
+            output stream float out;
 
-      float currentLevel;
-      float startLevel;
+            SegmentState state = SegmentState::Free;
+            float currentLevel;
+            float initialLevel;
+            node phasor = Components::OneShotPhasor;
 
-      event capture() {
-        startLevel = currentLevel;
-        phasor.trigger <- void;
-      }
+            event latch () 
+            {
+                initialLevel = currentLevel;
+                phasor.trigger <- void;
+                // We cheat a little here. The phasor needs a frame to reset itself to zero.
+                phasor.advance();
+                state = SegmentState::Latched;
+            }
 
-      event halt() {
-        phasor.halt <- void;
-      }
-
-      node phasor = Components::OneShotPhasor;
-    
-      void main() {
-        loop {
-          if (phasor.phase < 0.f) {
-            currentLevel = in;
-          
-          } else if (phasor.phase == 1.f) {
-            currentLevel = targetLevel;
-            trigger <- void;
-
-          } else {
-            let phaseFactor = (phasor.phase/(curve * phasor.phase + (1.f - curve)));
-            currentLevel = (targetLevel - startLevel) * phaseFactor + startLevel;
-          }
-          
-          out <- currentLevel;
-          phasor.seconds <- seconds;
-          phasor.advance();
-          advance();
+            event free () 
+            {
+                state = SegmentState::Free;
+            }
+        
+            void main () 
+            {
+                loop 
+                {
+                    if (state == SegmentState::Free) 
+                    {
+                        currentLevel = in;
+                    } 
+                    else if (state == SegmentState::Latched)
+                    {
+                        if (phasor.phase == 1.f) 
+                        {
+                            trigger <- void;
+                            currentLevel = targetLevel;
+                            state = SegmentState::Free;
+                        }                        
+                        else {
+                            let phaseFactor = (phasor.phase / (curve * phasor.phase + (1.f - curve)));
+                            currentLevel = (targetLevel - initialLevel) * phaseFactor + initialLevel;
+                        }
+                    }
+                    
+                    out <- currentLevel;
+                    phasor.seconds <- seconds;
+                    phasor.advance();
+                    advance();
+                }
+            }
         }
-      }
     }
-  }
 }

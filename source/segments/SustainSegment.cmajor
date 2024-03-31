@@ -2,42 +2,35 @@ namespace EnvelopeBuilder {
   namespace Segments {
     processor SustainSegment {
       input stream float in;
-      input event void capture;
-      input event void halt;
+      input event void latch;
+      input event void free;
       output event void trigger;
       output stream float out;
 
-      enum State {
-        Active, Inactive, Transitioning
+      SegmentState state = SegmentState::Free;
+      float level;
+
+      event latch() {
+        state = SegmentState::Latched;
       }
 
-      State state = State::Inactive;
-      float currentLevel;
-      float capturedLevel;
-
-      event capture() {
-        capturedLevel = currentLevel;
-        state = State::Active;
-      }
-
-      event halt() {
+      event free() {
         trigger <- void;
-        if (state == State::Active) {
-          state = State::Transitioning;  
-        }
+        state = SegmentState::Freeing;  
       }
 
       void main() {
         loop {
-          if (state == State::Inactive) {
-            currentLevel = in;
-          } else if (state == State::Active) {
-            currentLevel = capturedLevel;
-          } else if (state == State::Transitioning) {
-            currentLevel = capturedLevel;
-            state = State::Inactive;
-          }
-          out <- currentLevel;
+          if (state == SegmentState::Free) {
+            level = in;
+          } else if (state == SegmentState::Latched) {
+            // just sustain the existing `level`. Don’t update it.
+          } else if (state == SegmentState::Freeing) {
+            trigger <- void;
+            // Take a cycle to move to free. This allows the next segment to latch to the output before starting to pass through values again.
+            state = SegmentState::Free;
+          } 
+          out <- level;
           advance();
         }
       }

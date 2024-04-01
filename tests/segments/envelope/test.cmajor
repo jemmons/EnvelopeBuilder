@@ -1,0 +1,133 @@
+graph testPassthrough
+{
+    input stream float ramp1k;
+    output stream float ramp1ko;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        ramp1k -> env.in;
+        env.out -> ramp1ko;
+    }
+}
+
+graph testLinearLatch
+{
+    input stream float ramp1k;
+    input env.latch;
+    output stream float linLatch200;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.3f -> env.seconds;
+        ramp1k -> env.in;
+        env.out -> linLatch200;
+    }
+}
+
+graph testLinearFreeLate
+{
+    input stream float ramp1k;
+    input env.latch;
+    input env.free;
+    output stream float linFreeLate600;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.3f -> env.seconds;
+        ramp1k -> env.in;
+        env.out -> linFreeLate600;
+    }
+}
+
+graph testLinearFreeEarly
+{
+    input stream float ramp1k;
+    input env.latch;
+    input env.free;
+    output stream float linFreeEarly600;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.5f -> env.seconds;
+        ramp1k -> env.in;
+        env.out -> linFreeEarly600;
+    }
+}
+
+graph testCurveLatch
+{
+    input stream float ramp1k;
+    input env.latch;
+    output stream float curLatch200;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.3f -> env.seconds;
+        0.9f -> env.curve;
+        ramp1k -> env.in;
+        env.out -> curLatch200;
+    }
+}
+
+graph testCurveFreeLate
+{
+    input stream float ramp1k;
+    input env.latch;
+    input env.free;
+    output stream float curFreeLate600;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.3f -> env.seconds;
+        0.9f -> env.curve;
+        ramp1k -> env.in;
+        env.out -> curFreeLate600;
+    }
+}
+
+graph testCurveFreeEarly
+{
+    input stream float ramp1k;
+    input env.latch;
+    input env.free;
+    output stream float curFreeEarly600;
+
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.5f -> env.seconds;
+        0.9f -> env.curve;
+        ramp1k -> env.in;
+        env.out -> curFreeEarly600;
+    }
+}
+
+graph testZeroAttack
+{
+    input stream float ramp1k;
+    input env.latch;
+    output stream float zeroAttack;    
+    output event void trigger;
+    
+    node env = EnvelopeBuilder::Segments::EnvelopeSegment;
+
+    connection {
+        1.f -> env.targetLevel;
+        0.f -> env.seconds;
+        ramp1k -> env.in;
+        env.out -> zeroAttack;
+        env.trigger -> trigger;
+    }
+}

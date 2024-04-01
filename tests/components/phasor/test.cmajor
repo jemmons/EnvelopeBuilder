@@ -1,0 +1,12 @@
+graph testTriggerAndHold
+{
+    input pha.trigger;
+    output stream float trigAndHold;
+
+    node pha = EnvelopeBuilder::Components::OneShotPhasor;
+
+    connection {
+        0.5f -> pha.seconds;
+        pha -> trigAndHold;
+    }
+}

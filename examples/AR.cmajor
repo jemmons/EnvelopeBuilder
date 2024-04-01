@@ -1,0 +1,54 @@
+graph ARExample [[ main ]]
+{
+    input event std::midi::Message midi;
+    input AR.attack;
+    input AR.release;
+    output stream float out;
+
+    connection {
+        midi -> std::midi::MPEConverter -> AR.noteIn;
+        AR -> out;
+    }
+}
+
+graph AR 
+{
+    input event (std::notes::NoteOn, std::notes::NoteOff) noteIn;
+    input value float attack [[name: "Attack", min: 0.0, max: 10.0, init:0.3]];
+    input value float release [[name: "Release", min: 0.0, max: 10.0, init: 0.2]];
+    output stream float out;
+
+    node { 
+        att = EnvelopeBuilder::Segments::EnvelopeSegment;
+        sus = EnvelopeBuilder::Segments::SustainSegment;
+        rel = EnvelopeBuilder::Segments::EnvelopeSegment;
+    }
+
+    event noteIn(std::notes::NoteOn on) {
+        att.latch <- void;
+        sus.free <- void;
+        rel.free <- void;
+    }
+
+    event noteIn(std::notes::NoteOff off) {
+        att.free <- void;
+        rel.latch <- void;
+    }
+
+    connection {
+        1.f -> att.targetLevel;
+        0.f -> rel.targetLevel;
+
+        0.3f -> att.curve;
+        0.7f -> rel.curve;
+
+        attack -> att.seconds;
+        release -> rel.seconds;
+        
+        att.trigger -> sus.latch;
+
+        att.out -> sus.in;
+        sus.out -> rel.in;
+        rel.out -> out;
+    }
+}

@@ -1,0 +1,8 @@
+## runScript ({ frequency:1000, blockSize:32, samplesToRender:1000, patch:"test.cmajorpatch", mainProcessor:"testPassthrough" })
+## runScript ({ frequency:1000, blockSize:32, samplesToRender:1000, patch:"test.cmajorpatch", mainProcessor:"testLinearLatch" })
+## runScript ({ frequency:1000, blockSize:32, samplesToRender:1000, patch:"test.cmajorpatch", mainProcessor:"testCurveLatch" })
+## runScript ({ frequency:1000, blockSize:32, samplesToRender:1000, patch:"test.cmajorpatch", mainProcessor:"testLinearFreeLate" })
+## runScript ({ frequency:1000, blockSize:32, samplesToRender:1000, patch:"test.cmajorpatch", mainProcessor:"testLinearFreeEarly" })
+## runScript ({ frequency:1000, blockSize:32, samplesToRender:1000, patch:"test.cmajorpatch", mainProcessor:"testCurveFreeEarly" })
+## runScript ({ frequency:1000, blockSize:32, samplesToRender:1000, patch:"test.cmajorpatch", mainProcessor:"testCurveFreeLate" })
+## runScript ({ frequency:1000, blockSize:32, samplesToRender:1000, patch:"test.cmajorpatch", mainProcessor:"testZeroAttack" })

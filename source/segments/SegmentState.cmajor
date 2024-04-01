@@ -1,0 +1,10 @@
+namespace EnvelopeBuilder 
+{
+    namespace Segments
+    {
+        enum SegmentState 
+        {
+            Latched, Free
+        }
+    }
+}

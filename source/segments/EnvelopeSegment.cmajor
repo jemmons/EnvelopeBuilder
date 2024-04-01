@@ -46,14 +46,17 @@ namespace EnvelopeBuilder
                         {
                             trigger <- void;
                             currentLevel = targetLevel;
-                            state = SegmentState::Free;
+                            state = SegmentState::Trigged;
                         }                        
                         else {
                             let phaseFactor = (phasor.phase / (curve * phasor.phase + (1.f - curve)));
                             currentLevel = (targetLevel - initialLevel) * phaseFactor + initialLevel;
                         }
                     }
-                    
+                    else if (state == SegmentState::Trigged)
+                    {
+                        currentLevel = targetLevel;
+                    }
                     out <- currentLevel;
                     phasor.seconds <- seconds;
                     phasor.advance();

@@ -4,7 +4,6 @@ namespace EnvelopeBuilder {
       input stream float in;
       input event void latch;
       input event void free;
-      output event void trigger;
       output stream float out;
 
       SegmentState state = SegmentState::Free;
@@ -15,8 +14,7 @@ namespace EnvelopeBuilder {
       }
 
       event free() {
-        trigger <- void;
-        state = SegmentState::Freeing;  
+        state = SegmentState::Free;
       }
 
       void main() {
@@ -25,10 +23,6 @@ namespace EnvelopeBuilder {
             level = in;
           } else if (state == SegmentState::Latched) {
             // just sustain the existing `level`. Don’t update it.
-          } else if (state == SegmentState::Freeing) {
-            trigger <- void;
-            // Take a cycle to move to free. This allows the next segment to latch to the output before starting to pass through values again.
-            state = SegmentState::Free;
           } 
           out <- level;
           advance();

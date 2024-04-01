@@ -25,22 +25,21 @@ graph ADSR
     node { 
         att = EnvelopeBuilder::Segments::EnvelopeSegment;
         dec = EnvelopeBuilder::Segments::EnvelopeSegment;
-        // sus = EnvelopeBuilder::Segments::SustainSegment;
+        sus = EnvelopeBuilder::Segments::SustainSegment;
         rel = EnvelopeBuilder::Segments::EnvelopeSegment;
         clipper = EnvelopeBuilder::Components::ClipNormal;
     }
 
     event noteIn(std::notes::NoteOn on) {
-        dec.free <- void;
-        // sus.free <- void;
-        rel.free <- void;
         att.latch <- void;
+        dec.free <- void;
+        sus.free <- void;
+        rel.free <- void;
     }
 
     event noteIn(std::notes::NoteOff off) {
         att.free <- void;
-        dec.free <- void;
-        // sus.free <- void;
+        rel.latch <- void;
     }
 
     connection {
@@ -57,14 +56,12 @@ graph ADSR
         release -> rel.seconds;
         
         att.trigger -> dec.latch;
-        // dec.trigger -> sus.latch;
-        // sus.trigger -> rel.latch;
-        dec.trigger -> rel.latch;
+        dec.trigger -> sus.latch;
+
         
         att.out -> dec.in;
-        // dec.out -> sus.in;
-        // sus.out -> rel.in;
-        dec.out -> rel.in;
+        dec.out -> sus.in;
+        sus.out -> rel.in;
         rel.out -> clipper -> out;
     }
 }

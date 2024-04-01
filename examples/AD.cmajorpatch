@@ -11,9 +11,8 @@
 
     "source":           [
         "../source/segments/EnvelopeSegment.cmajor",
-        "../source/segments/SustainSegment.cmajor",
         "../source/segments/SegmentState.cmajor",
         "../source/components/OneShotPhasor.cmajor",
-        "ADSR.cmajor"
+        "AD.cmajor"
     ]
 }

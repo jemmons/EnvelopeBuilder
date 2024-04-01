@@ -40,5 +40,4 @@ graph testFree
         ramp1k -> sus.in;
         sus.out -> free600;
     }
-
 }

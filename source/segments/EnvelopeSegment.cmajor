@@ -13,6 +13,11 @@ namespace EnvelopeBuilder
             output event void trigger;
             output stream float out;
 
+            enum TrigState
+            {
+                Ready, Triggering, Triggered
+            }
+            TrigState trigState = TrigState::Ready;
             SegmentState state = SegmentState::Free;
             float currentLevel;
             float initialLevel;
@@ -29,6 +34,7 @@ namespace EnvelopeBuilder
 
             event free () 
             {
+                trigState = TrigState::Ready;
                 state = SegmentState::Free;
             }
         
@@ -42,20 +48,29 @@ namespace EnvelopeBuilder
                     } 
                     else if (state == SegmentState::Latched)
                     {
-                        if (phasor.phase == 1.f) 
+                        if (trigState == TrigState::Ready)
+                        {
+                            if (phasor.phase == 1.f) 
+                            {
+                                currentLevel = targetLevel;
+                                trigState = TrigState::Triggering;
+                            }                        
+                            else 
+                            {
+                                let phaseFactor = (phasor.phase / (curve * phasor.phase + (1.f - curve)));
+                                currentLevel = (targetLevel - initialLevel) * phaseFactor + initialLevel;
+                            }
+                        }
+                        else if (trigState == TrigState::Triggering) 
                         {
                             trigger <- void;
                             currentLevel = targetLevel;
-                            state = SegmentState::Trigged;
-                        }                        
-                        else {
-                            let phaseFactor = (phasor.phase / (curve * phasor.phase + (1.f - curve)));
-                            currentLevel = (targetLevel - initialLevel) * phaseFactor + initialLevel;
+                            trigState = TrigState::Triggered;
                         }
-                    }
-                    else if (state == SegmentState::Trigged)
-                    {
-                        currentLevel = targetLevel;
+                        else if (trigState == TrigState::Triggered)
+                        {
+                            currentLevel = targetLevel;
+                        }
                     }
                     out <- currentLevel;
                     phasor.seconds <- seconds;

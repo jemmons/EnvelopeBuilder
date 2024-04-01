@@ -4,7 +4,7 @@ namespace EnvelopeBuilder
     {
         enum SegmentState 
         {
-            Latched, Free, Trigged
+            Latched, Free
         }
     }
 }

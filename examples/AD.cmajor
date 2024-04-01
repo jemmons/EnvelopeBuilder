@@ -1,67 +1,51 @@
-graph ADSRExample [[ main ]]
+graph ADExample [[ main ]]
 {
     input event std::midi::Message midi;
-    input ADSR.attack;
-    input ADSR.decay;
-    input ADSR.sustain;
-    input ADSR.release;
+    input AD.attack;
+    input AD.decay;
     output stream float out;
 
     connection {
-        midi -> std::midi::MPEConverter -> ADSR.noteIn;
-        ADSR -> out;
+        midi -> std::midi::MPEConverter -> AD.noteIn;
+        AD -> out;
     }
 }
 
-graph ADSR 
+graph AD 
 {
     input event (std::notes::NoteOn, std::notes::NoteOff) noteIn;
     input value float attack [[name: "Attack", min: 0.0, max: 10.0, init:0.3]];
     input value float decay [[name: "Decay", min: 0.0, max: 10.0, init: 0.2]];
-    input value float sustain [[name: "Sustain", min: 0.0, max: 1.0, init: 0.70]];
-    input value float release [[name: "Release", min: 0.0, max: 10.0, init: 0.3]];
     output stream float out;
 
     node { 
         att = EnvelopeBuilder::Segments::EnvelopeSegment;
         dec = EnvelopeBuilder::Segments::EnvelopeSegment;
-        sus = EnvelopeBuilder::Segments::SustainSegment;
-        rel = EnvelopeBuilder::Segments::EnvelopeSegment;
     }
 
     event noteIn(std::notes::NoteOn on) {
         att.latch <- void;
         dec.free <- void;
-        sus.free <- void;
-        rel.free <- void;
     }
 
     event noteIn(std::notes::NoteOff off) {
         att.free <- void;
-        dec.free <-void;
-        rel.latch <- void;
+        dec.latch <- void;
     }
 
     connection {
         1.f -> att.targetLevel;
-        0.f -> rel.targetLevel;
+        0.f -> dec.targetLevel;
 
         0.3f -> att.curve;
         0.7f -> dec.curve;
-        0.7f -> rel.curve;
 
         attack -> att.seconds;
         decay -> dec.seconds;
-        sustain -> dec.targetLevel;
-        release -> rel.seconds;
         
         att.trigger -> dec.latch;
-        dec.trigger -> sus.latch;
 
-        
         att.out -> dec.in;
-        dec.out -> sus.in;
-        sus.out -> rel.in;
-        rel.out -> out;
+        dec.out -> out;
     }
 }

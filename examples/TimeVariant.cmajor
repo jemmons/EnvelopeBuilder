@@ -1,0 +1,83 @@
+graph TimeVariantExample [[ main ]]
+{
+    input event std::midi::Message midi;
+    input TimeVariant.l0;
+    input TimeVariant.t1;
+    input TimeVariant.l1;
+    input TimeVariant.t2;
+    input TimeVariant.l2;
+    input TimeVariant.t3;
+    input TimeVariant.l3;
+    input TimeVariant.t4;
+    input TimeVariant.l4;
+    output stream float out;
+
+    connection 
+    {
+        midi -> std::midi::MPEConverter -> TimeVariant.noteIn;
+        TimeVariant -> out;
+    }
+}
+
+graph TimeVariant 
+{
+    input event (std::notes::NoteOn, std::notes::NoteOff) noteIn;
+    input value float l0 [[name: "L0", min: 0.0, max: 1.0, init:0.0]];
+    input value float t1 [[name: "T1/Attack", min: 0.0, max: 10.0, init: 0.2]];
+    input value float l1 [[name: "L1", min: 0.0, max: 1.0, init: 1.0]];
+    input value float t2 [[name: "T2", min: 0.0, max: 10.0, init: 0.2]];
+    input value float l2 [[name: "L2", min: 0.0, max: 1.0, init: 1.0]];
+    input value float t3 [[name: "T3/Decay", min: 0.0, max: 10.0, init: 0.2]];
+    input value float l3 [[name: "L3/Sustain", min: 0.0, max: 1.0, init: 1.0]];
+    input value float t4 [[name: "T4/Release", min: 0.0, max: 10.0, init: 0.2]];
+    input value float l4 [[name: "L4", min: 0.0, max: 1.0, init: 1.0]];
+    output stream float out;
+
+    node 
+    { 
+        att = EnvelopeBuilder::Segments::EnvelopeSegment;
+        con = EnvelopeBuilder::Segments::EnvelopeSegment;
+        dec = EnvelopeBuilder::Segments::EnvelopeSegment;
+        sus = EnvelopeBuilder::Segments::SustainSegment;
+        rel = EnvelopeBuilder::Segments::EnvelopeSegment;
+    }
+
+    event noteIn(std::notes::NoteOn on) 
+    {
+        att.latch <- void;
+        con.free <- void;
+        dec.free <- void;
+        sus.free <- void;
+        rel.free <- void;
+    }
+
+    event noteIn(std::notes::NoteOff off) 
+    {
+        att.free <- void;
+        rel.latch <- void;
+    }
+
+    connection 
+    {
+        l0 -> att.in;
+        l1 -> att.targetLevel;
+        l2 -> con.targetLevel;
+        l3 -> dec.targetLevel;
+        l4 -> rel.targetLevel;
+
+        t1 -> att.seconds;
+        t2 -> con.seconds;
+        t3 -> dec.seconds;
+        t4 -> rel.seconds;
+
+        att.trigger -> con.latch;
+        con.trigger -> dec.latch;
+        dec.trigger -> sus.latch;
+        
+        att.out -> con.in;
+        con.out -> dec.in;
+        dec.out -> sus.in;
+        sus.out -> rel.in;
+        rel.out -> out;
+    }
+}

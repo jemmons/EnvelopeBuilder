@@ -1,22 +1,24 @@
-graph ADSRExample [[ main ]]
+graph AHDSRExample [[ main ]]
 {
     input event std::midi::Message midi;
-    input ADSR.attack;
-    input ADSR.decay;
-    input ADSR.sustain;
-    input ADSR.release;
+    input AHDSR.attack;
+    input AHDSR.hold;
+    input AHDSR.decay;
+    input AHDSR.sustain;
+    input AHDSR.release;
     output stream float out;
 
     connection {
-        midi -> std::midi::MPEConverter -> ADSR.noteIn;
-        ADSR -> out;
+        midi -> std::midi::MPEConverter -> AHDSR.noteIn;
+        AHDSR -> out;
     }
 }
 
-graph ADSR 
+graph AHDSR 
 {
     input event (std::notes::NoteOn, std::notes::NoteOff) noteIn;
     input value float attack [[name: "Attack", min: 0.0, max: 10.0, init:0.3]];
+    input value float hold [[name: "Hold", min: 0.0, max: 10.0, init:0.0]];
     input value float decay [[name: "Decay", min: 0.0, max: 10.0, init: 0.2]];
     input value float sustain [[name: "Sustain", min: 0.0, max: 1.0, init: 0.70]];
     input value float release [[name: "Release", min: 0.0, max: 10.0, init: 0.3]];
@@ -24,6 +26,7 @@ graph ADSR
 
     node { 
         att = EnvelopeBuilder::Segments::EnvelopeSegment;
+        hol = EnvelopeBuilder::Segments::EnvelopeSegment;
         dec = EnvelopeBuilder::Segments::EnvelopeSegment;
         sus = EnvelopeBuilder::Segments::SustainSegment;
         rel = EnvelopeBuilder::Segments::EnvelopeSegment;
@@ -31,6 +34,7 @@ graph ADSR
 
     event noteIn(std::notes::NoteOn on) {
         att.latch <- void;
+        hol.free <- void;
         dec.free <- void;
         sus.free <- void;
         rel.free <- void;
@@ -43,6 +47,7 @@ graph ADSR
 
     connection {
         1.f -> att.targetLevel;
+        1.f -> hol.targetLevel;
         0.f -> rel.targetLevel;
 
         0.3f -> att.curve;
@@ -50,15 +55,17 @@ graph ADSR
         0.7f -> rel.curve;
 
         attack -> att.seconds;
+        hold -> hol.seconds;
         decay -> dec.seconds;
         sustain -> dec.targetLevel;
         release -> rel.seconds;
         
-        att.trigger -> dec.latch;
+        att.trigger -> hol.latch;
+        hol.trigger -> dec.latch;
         dec.trigger -> sus.latch;
 
-        
-        att.out -> dec.in;
+        att.out -> hol.in;
+        hol.out -> dec.in;
         dec.out -> sus.in;
         sus.out -> rel.in;
         rel.out -> out;

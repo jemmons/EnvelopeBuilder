@@ -2,12 +2,12 @@ namespace EnvelopeBuilder
 {
     namespace Segments 
     {
-        processor EnvelopeSegment 
+        processor EnvelopeSegment(float initialTargetLevel = 1.f, float initialCurve = 0.f)
         {
             input stream float in;
-            input value float seconds;
-            input value float targetLevel;
-            input value float curve;
+            input event float seconds;
+            input event float targetLevelIn;
+            input event float curveIn;
             input event void latch;
             input event void free;
             output event void trigger;
@@ -21,7 +21,13 @@ namespace EnvelopeBuilder
             SegmentState state = SegmentState::Free;
             float currentLevel;
             float initialLevel;
+            float targetLevel = initialTargetLevel;
+            float curve = initialCurve;
             node phasor = Components::OneShotPhasor;
+
+            event seconds (float s) { phasor.seconds <- s; }
+            event targetLevelIn (float t) { targetLevel = t; }
+            event curveIn (float c) { curve = c; }
 
             event latch () 
             {
@@ -73,7 +79,6 @@ namespace EnvelopeBuilder
                         }
                     }
                     out <- currentLevel;
-                    phasor.seconds <- seconds;
                     phasor.advance();
                     advance();
                 }

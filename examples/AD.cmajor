@@ -14,13 +14,13 @@ graph ADExample [[ main ]]
 graph AD 
 {
     input event (std::notes::NoteOn, std::notes::NoteOff) noteIn;
-    input value float attack [[name: "Attack", min: 0.0, max: 10.0, init:0.3]];
-    input value float decay [[name: "Decay", min: 0.0, max: 10.0, init: 0.2]];
+    input event float attack [[name: "Attack", min: 0.0, max: 10.0, init:0.3]];
+    input event float decay [[name: "Decay", min: 0.0, max: 10.0, init: 0.2]];
     output stream float out;
 
     node { 
-        att = EnvelopeBuilder::Segments::EnvelopeSegment;
-        dec = EnvelopeBuilder::Segments::EnvelopeSegment;
+        att = EnvelopeBuilder::Segments::EnvelopeSegment(1.f, 0.3f);
+        dec = EnvelopeBuilder::Segments::EnvelopeSegment(0.f, 0.7f);
     }
 
     event noteIn(std::notes::NoteOn on) {
@@ -34,12 +34,6 @@ graph AD
     }
 
     connection {
-        1.f -> att.targetLevel;
-        0.f -> dec.targetLevel;
-
-        0.3f -> att.curve;
-        0.7f -> dec.curve;
-
         attack -> att.seconds;
         decay -> dec.seconds;
         

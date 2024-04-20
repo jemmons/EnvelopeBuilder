@@ -1,0 +1,22 @@
+namespace EnvelopeBuilder {
+    namespace Util {
+        processor EventToStream
+        {
+            input event float in;
+            output stream float out;
+
+            float val = 0.f;
+            
+            event in (float i) { val = i; }
+
+            void main()
+            {
+                loop
+                {
+                    out <- val;
+                    advance();
+                }
+            }
+        }
+    }
+}

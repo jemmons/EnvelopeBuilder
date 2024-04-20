@@ -17,19 +17,19 @@ graph AHDSRExample [[ main ]]
 graph AHDSR 
 {
     input event (std::notes::NoteOn, std::notes::NoteOff) noteIn;
-    input value float attack [[name: "Attack", min: 0.0, max: 10.0, init:0.3]];
-    input value float hold [[name: "Hold", min: 0.0, max: 10.0, init:0.0]];
-    input value float decay [[name: "Decay", min: 0.0, max: 10.0, init: 0.2]];
-    input value float sustain [[name: "Sustain", min: 0.0, max: 1.0, init: 0.70]];
-    input value float release [[name: "Release", min: 0.0, max: 10.0, init: 0.3]];
+    input event float attack [[name: "Attack", min: 0.0, max: 10.0, init:0.3]];
+    input event float hold [[name: "Hold", min: 0.0, max: 10.0, init:0.0]];
+    input event float decay [[name: "Decay", min: 0.0, max: 10.0, init: 0.2]];
+    input event float sustain [[name: "Sustain", min: 0.0, max: 1.0, init: 0.70]];
+    input event float release [[name: "Release", min: 0.0, max: 10.0, init: 0.3]];
     output stream float out;
 
     node { 
-        att = EnvelopeBuilder::Segments::EnvelopeSegment;
-        hol = EnvelopeBuilder::Segments::EnvelopeSegment;
-        dec = EnvelopeBuilder::Segments::EnvelopeSegment;
+        att = EnvelopeBuilder::Segments::EnvelopeSegment(1.f, 0.3f);
+        hol = EnvelopeBuilder::Segments::EnvelopeSegment(1.f);
+        dec = EnvelopeBuilder::Segments::EnvelopeSegment(1.f, 0.7f);
         sus = EnvelopeBuilder::Segments::SustainSegment;
-        rel = EnvelopeBuilder::Segments::EnvelopeSegment;
+        rel = EnvelopeBuilder::Segments::EnvelopeSegment(0.f, 0.7f);
     }
 
     event noteIn(std::notes::NoteOn on) {
@@ -46,18 +46,10 @@ graph AHDSR
     }
 
     connection {
-        1.f -> att.targetLevel;
-        1.f -> hol.targetLevel;
-        0.f -> rel.targetLevel;
-
-        0.3f -> att.curve;
-        0.7f -> dec.curve;
-        0.7f -> rel.curve;
-
         attack -> att.seconds;
         hold -> hol.seconds;
         decay -> dec.seconds;
-        sustain -> dec.targetLevel;
+        sustain -> dec.targetLevelIn;
         release -> rel.seconds;
         
         att.trigger -> hol.latch;

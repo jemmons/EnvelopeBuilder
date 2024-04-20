@@ -1,0 +1,23 @@
+namespace EnvelopeBuilder {
+    namespace Util {
+        processor ValueToEvent
+        {
+            input value float in;
+            output event float out;
+            float lastValue = -1.f;
+
+            void main() 
+            {
+                loop
+                {
+                    if (in != lastValue) 
+                    {
+                        lastValue = in;
+                        out <- in;
+                    }
+                    advance();
+                }
+            }
+        }
+    }
+}

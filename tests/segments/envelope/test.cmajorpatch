@@ -12,6 +12,7 @@
         "../../../source/segments/EnvelopeSegment.cmajor",
         "../../../source/segments/SegmentState.cmajor",
         "../../../source/components/OneShotPhasor.cmajor",
+        "../../../source/util/ValueToEvent.cmajor",
         "test.cmajor"
     ]
 }

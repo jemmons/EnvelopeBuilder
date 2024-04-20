@@ -1,0 +1,14 @@
+namespace EnvelopeBuilder {
+    namespace Util {
+        processor EventToValue
+        {
+            input event float in;
+            output value float out;
+
+            event in (float i) 
+            {
+                out <- i;
+            }
+        }
+    }
+}
